@@ -1,58 +1,72 @@
 import React from 'react';
-import logo from './logo.svg';
-import { Counter } from './features/counter/Counter';
-import './App.css';
+import { selectCurrentTab } from './redux/tabsSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import clsx from 'clsx';
+import { makeStyles } from '@material-ui/core/styles';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import AppBarMenu from './components/layout/AppBarMenu';
+import DrawerMenu from './components/layout/DrawerMenu';
+import Main from './pages/Main';
+import {
+	openDrawer,
+	closeDrawer,
+	selectDrawerStatus,
+} from './redux/drawerSlice';
+import { layoutStyles } from './components/MaterialUIStyles';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <Counter />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <span>
-          <span>Learn </span>
-          <a
-            className="App-link"
-            href="https://reactjs.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux-toolkit.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux Toolkit
-          </a>
-          ,<span> and </span>
-          <a
-            className="App-link"
-            href="https://react-redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React Redux
-          </a>
-        </span>
-      </header>
-    </div>
-  );
+const useLayoutStyles = makeStyles((theme) => layoutStyles(theme));
+
+function App({ persistor }) {
+	const dispatch = useDispatch();
+	const open = useSelector(selectDrawerStatus);
+	const currentTab = useSelector(selectCurrentTab);
+	const layoutClasses = useLayoutStyles();
+
+	const handleDrawerOpen = () => {
+		dispatch(openDrawer());
+	};
+
+	const handleDrawerClose = () => {
+		dispatch(closeDrawer());
+	};
+
+	const resetState = () => {
+		persistor.pause();
+		persistor.purge();
+		persistor.persist();
+		window.location.reload();
+	};
+
+	return (
+		<div className={layoutClasses.root}>
+			<CssBaseline />
+			<AppBarMenu
+				open={open}
+				handleDrawerOpen={handleDrawerOpen}
+				handleDrawerClose={handleDrawerClose}
+				resetState={resetState}
+			/>
+			<DrawerMenu
+				open={open}
+				handleDrawerClose={handleDrawerClose}
+				resetState={resetState}
+			/>
+			<main
+				className={clsx(layoutClasses.content, {
+					[layoutClasses.contentShift]: open,
+				})}
+			>
+				<div className={layoutClasses.drawerHeader} />
+
+				<Main
+					className={clsx(layoutClasses.content, {
+						[layoutClasses.contentShift]: open,
+					})}
+					currentTab={currentTab}
+				/>
+			</main>
+		</div>
+	);
 }
 
 export default App;

@@ -1,21 +1,48 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
 import App from './App';
-import { store } from './app/store';
+import { store } from './redux/store';
 import { Provider } from 'react-redux';
-import * as serviceWorker from './serviceWorker';
+import { PersistGate } from 'reduxjs-toolkit-persist/integration/react';
+import { persistStore } from 'reduxjs-toolkit-persist';
+import { createTheme } from '@material-ui/core/styles';
+import { ThemeProvider } from '@material-ui/styles';
+import { blueGrey, orange } from '@material-ui/core/colors';
+
+let persistor = persistStore(store);
+
+const theme = createTheme({
+	palette: {
+		background: {
+			default: blueGrey[500],
+		},
+		text: {
+			primary: '#ffffff',
+		},
+		primary: {
+			light: orange[300],
+			main: orange[500],
+			dark: orange[800],
+			contrastText: '#ffffff',
+		},
+		secondary: {
+			light: blueGrey[300],
+			main: blueGrey[500],
+			dark: blueGrey[800],
+			contrastText: '#ffffff',
+		},
+		contrastThreshold: 3,
+		tonalOffset: 0.2,
+	},
+});
 
 ReactDOM.render(
-  <React.StrictMode>
-    <Provider store={store}>
-      <App />
-    </Provider>
-  </React.StrictMode>,
-  document.getElementById('root')
+	<Provider store={store}>
+		<PersistGate loading={null} persistor={persistor}>
+			<ThemeProvider theme={theme}>
+				<App persistor={persistor} />
+			</ThemeProvider>
+		</PersistGate>
+	</Provider>,
+	document.getElementById('root')
 );
-
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.unregister();
